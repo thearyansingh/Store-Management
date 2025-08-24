@@ -43,8 +43,8 @@ const login = async (req, res, next) => {
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1h' });
      return res.cookie('token', token, {
   httpOnly: true,   // prevents JS access
-  secure: true,     // only over HTTPS
-  sameSite: 'strict', 
+  secure:true,
+  sameSite: 'none', 
   maxAge: 3600000   // 1 hour
 }).json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role }});
   } catch (err) {
@@ -74,4 +74,17 @@ const changePassword = async (req, res, next) => {
   }
 };
 
-export {register,login,changePassword}
+const logout=async(req,res)=>{
+res.clearCookie('token'); 
+  res.json({ message: 'Logged out successfully' });
+}
+const me=async(req,res)=>{
+ try {
+    const user = await User.findByPk(req.user.id, { attributes: ['id', 'name', 'email', 'role'] });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+export {register,login,changePassword,logout,me}

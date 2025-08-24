@@ -101,78 +101,78 @@ export const getUser = async (req, res, next) => {
   }
 };
 
-export const createStore = async (req, res, next) => {
-  try {
-    const { name, email, address, owner_id } = req.body;
+  export const createStore = async (req, res, next) => {
+    try {
+      const { name, email, address, owner_id } = req.body;
 
-    if (!name) return res.status(400).json({ message: 'Name required' });
-    if (!address)
-      return res.status(400).json({ message: 'Address required' });
-    if (email && !emailRegex.test(email))
-      return res.status(400).json({ message: 'Invalid email' });
+      if (!name) return res.status(400).json({ message: 'Name required' });
+      if (!address)
+        return res.status(400).json({ message: 'Address required' });
+      if (email && !emailRegex.test(email))
+        return res.status(400).json({ message: 'Invalid email' });
 
-    if (owner_id) {
-      const owner = await User.findByPk(owner_id);
-      if (!owner) return res.status(404).json({ message: 'Owner not found' });
-      if (owner.role !== 'owner')
-        return res.status(400).json({ message: 'User is not a store owner' });
+      if (owner_id) {
+        const owner = await User.findByPk(owner_id);
+        if (!owner) return res.status(404).json({ message: 'Owner not found' });
+        if (owner.role !== 'owner')
+          return res.status(400).json({ message: 'User is not a store owner' });
+      }
+
+      const store = await Store.create({
+        name,
+        email,
+        address,
+        owner_id: owner_id || null
+      });
+
+      return res.status(201).json(store);
+    } catch (err) {
+      next(err);
     }
+  };
 
-    const store = await Store.create({
-      name,
-      email,
-      address,
-      owner_id: owner_id || null
-    });
+  export const listStores = async (req, res, next) => {
+    try {
+      const { name, email, address, page = 1, limit = 20 } = req.query;
+      const where = {};
 
-    return res.status(201).json(store);
-  } catch (err) {
-    next(err);
-  }
-};
+      if (name) where.name = { [Op.like]: `%${name}%` };
+      if (email) where.email = { [Op.like]: `%${email}%` };
+      if (address) where.address = { [Op.like]: `%${address}%` };
 
-export const listStores = async (req, res, next) => {
-  try {
-    const { name, email, address, page = 1, limit = 20 } = req.query;
-    const where = {};
+      const offset = (page - 1) * limit;
 
-    if (name) where.name = { [Op.like]: `%${name}%` };
-    if (email) where.email = { [Op.like]: `%${email}%` };
-    if (address) where.address = { [Op.like]: `%${address}%` };
+      const stores = await Store.findAll({
+        where,
+        attributes: [
+          'id',
+          'name',
+          'email',
+          'address',
+          'owner_id',
+          [
+            sequelize.literal(
+              `(SELECT ROUND(AVG(r.rating), 2) FROM ratings r WHERE r.store_id = Store.id)`
+            ),
+            'average_rating'
+          ]
+        ],
+        limit: +limit,
+        offset: +offset
+      });
 
-    const offset = (page - 1) * limit;
+      const total = await Store.count({ where });
 
-    const stores = await Store.findAll({
-      where,
-      attributes: [
-        'id',
-        'name',
-        'email',
-        'address',
-        'owner_id',
-        [
-          sequelize.literal(
-            `(SELECT ROUND(AVG(r.rating), 2) FROM ratings r WHERE r.store_id = Store.id)`
-          ),
-          'average_rating'
-        ]
-      ],
-      limit: +limit,
-      offset: +offset
-    });
-
-    const total = await Store.count({ where });
-
-    return res.json({
-      total,
-      page: +page,
-      perPage: +limit,
-      data: stores
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+      return res.json({
+        total,
+        page: +page,
+        perPage: +limit,
+        data: stores
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 
 export const adminDashboard = async (req, res, next) => {
   try {
