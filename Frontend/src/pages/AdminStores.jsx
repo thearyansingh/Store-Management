@@ -14,12 +14,12 @@ export default function AdminStores() {
 
   const loadOwners = async () => {
     const { data } = await listUsers() // API should return all users
-console.log(data)
+// console.log(data)
     const onlyOwners = data?.data?.filter(u => u.role === 'owner')
-    console.log(onlyOwners)
+    // console.log(onlyOwners)
     setOwners(onlyOwners)
   }
-  console.log(owners)   
+//   console.log(owners)   
 
   useEffect(() => {
     load()

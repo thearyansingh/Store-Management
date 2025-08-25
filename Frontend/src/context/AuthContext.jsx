@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
       }
     })()
   }, [])
-  console.log(user)
+//   console.log(user)
 
   const login = async (email, password) => {
     const { data } = await apiLogin(email, password)

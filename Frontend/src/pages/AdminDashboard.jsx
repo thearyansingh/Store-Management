@@ -11,7 +11,7 @@ export default function AdminDashboard() {
       
     })()
   }, [])
-//   console.log(stats)
+
 
   return (
     <div className="space-y-4">
