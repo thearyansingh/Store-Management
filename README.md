@@ -1,4 +1,4 @@
-# Store Rating & Management Platform 📊
+<img width="1466" height="863" alt="Screenshot 2025-08-25 085511" src="https://github.com/user-attachments/assets/c25ee9f9-04e3-492d-9e83-14ae055e910e" /># Store Rating & Management Platform 📊
 
 A full-stack web application for managing stores, users, and ratings. The system allows admins to manage users and stores, normal users to explore and rate stores, and store owners to track their store ratings.
 
